@@ -22,8 +22,7 @@ const InputPage = () => {
     soil_phosphorus: '',
     soil_potassium: '',
     pest_severity: '',
-    area: '',
-    previous_yield_per_hectare: ''
+    area: ''
   });
 
   const navigate = useNavigate();
@@ -43,19 +42,21 @@ const InputPage = () => {
       const response = await fetch(`http://127.0.0.1:8000/weather/getWeatherData?district=${district}&season=${season}`);
       const data = await response.json();
       
-      // Set the fetched weather data in formData
+      // Set the fetched weather data, including windspeed
       setFormData((prevData) => ({
         ...prevData,
         temperature: data.average_temperature,
         rainfall: data.average_rainfall,
         sunshine_hours: data.average_sunshine_hours,
         humidity: data.average_humidity,
+        wind_speed: data.average_windspeed // Added windspeed data
       }));
-
+  
       // Log fetched data to the console
       console.log('Fetched Data:', data);
     }
   };
+  
 
   // Update the form data on district and season change
   const handleDistrictSeasonChange = (e) => {
@@ -131,47 +132,48 @@ const InputPage = () => {
 
             {/* Other form fields */}
             {Object.keys(formData).map((key) => {
-              if (key === 'district' || key === 'season') return null; // Skip district and season fields
+  if (key === 'district' || key === 'season') return null; // Skip district and season fields
 
-              let options = [];
-              switch (key) {
-                case 'soil_type':
-                  options = soilTypes;
-                  break;
-                case 'irrigation_type':
-                  options = irrigationTypes;
-                  break;
-                case 'water_source':
-                  options = waterSources;
-                  break;
-                case 'paddy_variety':
-                  options = paddyVarieties;
-                  break;
-                case 'pest_severity':
-                  options = pestSeverities;
-                  break;
-                default:
-                  options = [];
-              }
+  let options = [];
+  switch (key) {
+    case 'soil_type':
+      options = soilTypes;
+      break;
+    case 'irrigation_type':
+      options = irrigationTypes;
+      break;
+    case 'water_source':
+      options = waterSources;
+      break;
+    case 'paddy_variety':
+      options = paddyVarieties;
+      break;
+    case 'pest_severity':
+      options = pestSeverities;
+      break;
+    default:
+      options = [];
+  }
 
-              return (
-                <div key={key} className="mb-6">
-                  <label htmlFor={key} className="block text-white font-medium mb-2">{key.replace(/_/g, ' ')}:</label>
-                  {options.length > 0 ? (
-                    <select name={key} id={key} value={formData[key]} onChange={handleChange} className="mt-1 block w-full p-3 border border-green-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
-                      <option value="">Select {key.replace(/_/g, ' ')}</option>
-                      {options.map((option) => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type={key === 'area' || key === 'rainfall' || key === 'temperature' || key === 'humidity' || key === 'sunshine_hours' || key === 'wind_speed' || key === 'soil_phosphorus' ? 'number' : 'text'}
-                      name={key} id={key} value={formData[key]} onChange={handleChange} step="any" className="mt-1 block w-full p-3 border border-green-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" required />
-                  )}
-                </div>
-              );
-            })}
+  return (
+    <div key={key} className="mb-6">
+      <label htmlFor={key} className="block text-white font-medium mb-2">{key.replace(/_/g, ' ')}:</label>
+      {options.length > 0 ? (
+        <select name={key} id={key} value={formData[key]} onChange={handleChange} className="mt-1 block w-full p-3 border border-green-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+          <option value="">Select {key.replace(/_/g, ' ')}</option>
+          {options.map((option) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={key === 'area' || key === 'rainfall' || key === 'temperature' || key === 'humidity' || key === 'sunshine_hours' || key === 'wind_speed' || key === 'soil_phosphorus' ? 'number' : 'text'}
+          name={key} id={key} value={formData[key]} onChange={handleChange} step="any" className="mt-1 block w-full p-3 border border-green-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" required />
+      )}
+    </div>
+  );
+})}
+
             <button type="submit" className="col-span-1 md:col-span-2 w-full bg-green-600 text-white p-3 rounded-lg shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">Predict Yield</button>
           </form>
         </motion.div>

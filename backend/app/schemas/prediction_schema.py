@@ -22,4 +22,4 @@ class FarmData(BaseModel):
     previous_yield_per_hectare: Optional[float] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

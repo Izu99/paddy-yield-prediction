@@ -11,3 +11,5 @@ class WeatherData(Base):
     average_rainfall = Column(Float)
     average_sunshine_hours = Column(Float)
     average_humidity = Column(Float)
+    average_windspeed = Column(Float)  # Add average windspeed here
+    

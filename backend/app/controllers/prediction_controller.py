@@ -11,7 +11,10 @@ model = load_model("app/train_model/rice_yield_random_forest_model.pkl")
 # Prediction controller function
 async def predict_harvest(data: FarmData):
     try:
-        # Create a DataFrame with the input data
+        # Ensure previous_yield_per_hectare is set to 0 if not provided
+        previous_yield_per_hectare = 0  # Set to 0 by default
+
+        # Create a DataFrame with the input data, including previous_yield_per_hectare
         new_data = pd.DataFrame([{
             'Rainfall (mm)': data.rainfall,
             'Temperature (°C)': data.temperature,
@@ -29,35 +32,17 @@ async def predict_harvest(data: FarmData):
             'Soil Potassium (mg/kg)': data.soil_potassium,
             'Pest Severity': data.pest_severity,
             'Season': data.season,
-            'District': data.district
+            'District': data.district,
+            'Previous Yield (kg/hectare)': previous_yield_per_hectare  # Always 0
         }])
 
         # Predict the yield
         total_predicted_yield = model.predict(new_data)[0]
         predicted_yield_per_hectare = total_predicted_yield / data.area
 
-        recommendations = []
-
-        # Generate recommendations based on the predicted yield
-        if data.previous_yield_per_hectare > predicted_yield_per_hectare:
-            recommendations.append("Optimize fertilizer usage based on soil tests.")
-            recommendations.append("Improve irrigation practices to ensure consistent water supply.")
-            recommendations.append("Consider pest control measures to minimize yield loss.")
-            recommendations.append("Use high-yield paddy varieties suitable for the district.")
-            recommendations.append("Apply balanced soil nutrients and organic matter.")
-        elif predicted_yield_per_hectare > data.previous_yield_per_hectare:
-            recommendations.append("Continue current agricultural practices.")
-            recommendations.append("Monitor soil health regularly and apply nutrients accordingly.")
-            recommendations.append("Use precision farming tools to track crop progress.")
-            recommendations.append("Plan for seasonal crop rotation to maintain soil fertility.")
-            recommendations.append("Use modern harvesting techniques to minimize post-harvest losses.")
-        else:
-            recommendations.append("Keep up the current practices!")
-
         return {
             "total_predicted_yield": total_predicted_yield,
-            "predicted_yield_per_hectare": predicted_yield_per_hectare,
-            "recommendations": recommendations
+            "predicted_yield_per_hectare": predicted_yield_per_hectare
         }
     
     except Exception as e:
