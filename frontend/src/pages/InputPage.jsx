@@ -28,7 +28,7 @@ const InputPage = () => {
   const navigate = useNavigate();
 
   // Predefined options for select fields
-  const districts = ['Kandy', 'Colombo', 'Galle'];
+  const districts = ['Kandy', 'Colombo', 'Galle', 'Hambantota'];
   const seasons = ['Maha', 'Yala'];
   const soilTypes = ['Loam', 'Sandy', 'Clay'];
   const irrigationTypes = ['Rainfed', 'Canal', 'Tube Well'];
@@ -39,7 +39,7 @@ const InputPage = () => {
   // Fetch data based on selected district and season
   const fetchWeatherData = async (district, season) => {
     if (district && season) {
-      const response = await fetch(`http://127.0.0.1:8000/weather/getWeatherData?district=${district}&season=${season}`);
+      const response = await fetch(`http://127.0.0.1:8000/weather?district=${district}&season=${season}`);
       const data = await response.json();
       
       // Set the fetched weather data, including windspeed

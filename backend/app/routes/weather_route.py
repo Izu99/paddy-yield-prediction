@@ -6,7 +6,7 @@ from app.utils.database import get_db
 
 router = APIRouter()
 
-@router.get("/getWeatherData", response_model=WeatherData)
+@router.get("/", response_model=WeatherData)
 async def get_weather(district: str, season: str, db: Session = Depends(get_db)):
     try:
         print(f"Received request for district: {district}, season: {season}")  # Log the received request
