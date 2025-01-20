@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.form-container, .result-container {
-  background-color: rgba(0, 0, 0, 0.8);
-  color: rgb(77, 72, 72);
+body {
+  @apply font-sans; /* Applies Open Sans globally */
 }

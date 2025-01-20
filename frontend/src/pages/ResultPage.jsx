@@ -1,5 +1,6 @@
-import React, { useState } from 'react'; // Import useState from React
+import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -34,51 +35,115 @@ const ResultPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-8 px-4" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1692366727566-ba9b0a2c76a0?q=80&w=1542&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`, backgroundSize: 'cover' }}>
-      <Navbar />
-      <div className="bg-black bg-opacity-80 p-8 rounded-lg shadow-2xl w-full max-w-4xl">
-        <h1 className="text-4xl font-bold text-white mb-8">Prediction Results</h1>
-        {predictionResult ? (
-          <div className="p-8 rounded-lg w-full max-w-2xl">
-            <p className="text-xl mb-4 text-white">
-              Total Predicted Yield: {predictionResult.total_predicted_yield.toFixed(2)} kg
-            </p>
-            <p className="text-xl mb-4 text-white">
-              Predicted Yield per Hectare: {predictionResult.predicted_yield_per_hectare.toFixed(2)} kg
-            </p>
-            <p className="text-xl mb-4 text-white">
-              Previous Yield per Hectare:
-              <input
-                type="number"
-                value={previousYield}
-                onChange={handlePreviousYieldChange}
-                className="ml-2 p-2 rounded-md bordery text-md border-gray-300 text-gray-800"
-                placeholder="Enter previous yield per hectare"
-              />
-            </p>
-            <button
-              onClick={handleCompare}
-              className="mt-4 py-2 px-6 bg-blue-500 text-white rounded-lg hover:bg-blue-700"
-            >
-              Compare Yield
-            </button>
+    <div className="min-h-screen relative"   style={{
+      backgroundImage:
+        "url('https://lh3.googleusercontent.com/HQ9WPPhQdBRcJ3jh-cQiYeNXFxLjV3SSERuc5Qf81tDOx37dWD4JRzDGuIO45QE8j6hy98aOHWVMfcxT2N-EgjsHuLSq5g7uvGIQ2pr1R1D0RScdB_hPeEiR9ABpvaezlxLDa2xwBuYs3H_lP83S5iQ')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    }}>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 container mx-auto px-4 py-16"
+      >
+        <div className="max-w-4xl mx-auto">
+          <motion.div 
+            className="bg-black/80 rounded-3xl shadow-2xl overflow-hidden border border-primary/20"
+            whileHover={{ boxShadow: "0 25px 50px -12px rgba(54, 168, 54, 0.25)" }}
+          >
+            <div className="p-8 sm:p-12">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-darkyellow bg-clip-text text-transparent mb-12">
+                Prediction Results
+              </h1>
 
-            {comparisonResult && (
-              <p
-                className={`mt-4 text-2xl font-bold ${
-                  comparisonResult.includes('higher') ? 'text-green-500' : 'text-red-600'
-                }`}
+              {predictionResult ? (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-8"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <motion.div 
+                      whileHover={{ scale: 1.02 }}
+                      className="bg-darkblack/40 p-6 rounded-2xl border border-primary/30"
+                    >
+                      <p className="text-primary/80 mb-2">Total Predicted Yield</p>
+                      <p className="text-3xl font-bold text-white">
+                        {predictionResult.total_predicted_yield.toFixed(2)} kg
+                      </p>
+                    </motion.div>
+
+                    <motion.div 
+                      whileHover={{ scale: 1.02 }}
+                      className="bg-darkblack/40 p-6 rounded-2xl border border-primary/30"
+                    >
+                      <p className="text-primary/80 mb-2">Yield per Hectare</p>
+                      <p className="text-3xl font-bold text-white">
+                        {predictionResult.predicted_yield_per_hectare.toFixed(2)} kg
+                      </p>
+                    </motion.div>
+                  </div>
+
+                  <div className="bg-darkblack/30 p-8 rounded-2xl space-y-6">
+                    <p className="text-lg text-white">Previous Yield per Hectare:</p>
+                    <div className="flex gap-4">
+                      <input
+                        type="number"
+                        value={previousYield}
+                        onChange={handlePreviousYieldChange}
+                        className="flex-1 bg-darkblack/50 border-2 border-primary/50 text-white rounded-xl px-4 py-3 
+                                 focus:border-darkyellow focus:ring-2 focus:ring-darkyellow/50 transition-all
+                                 outline-none"
+                        placeholder="Enter previous yield..."
+                      />
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleCompare}
+                        className="bg-primary hover:bg-darkyellow text-white px-8 py-3 rounded-xl
+                                 font-semibold transition-colors duration-300 shadow-lg"
+                      >
+                        Compare
+                      </motion.button>
+                    </div>
+
+                    {comparisonResult && (
+                      <motion.p
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`text-xl font-semibold ${
+                          comparisonResult.includes('higher') 
+                            ? 'text-primary' 
+                            : 'text-red-800'
+                        }`}
+                      >
+                        {comparisonResult}
+                      </motion.p>
+                    )}
+                  </div>
+                </motion.div>
+              ) : (
+                <p className="text-xl text-darkyellow">No prediction result found</p>
+              )}
+
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                className="mt-12 text-center"
               >
-                {comparisonResult}
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-xl text-red-600">No prediction result found</p>
-        )}
-        <Link to="/" className="mt-8 text-white hover:underline">Go back to input page</Link>
-      </div>
-      <Footer />
+                <Link 
+                  to="/" 
+                  className="inline-block border border-darkgreen bg-darkblack/50 hover:bg-primary/80 text-white px-8 py-3 
+                           rounded-xl transition-all duration-300"
+                >
+                  ← Back to Input Page
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
     </div>
   );
 };

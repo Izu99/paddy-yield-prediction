@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { useAuth } from '../AuthContext';
 
@@ -10,7 +10,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,7 +19,7 @@ const LoginPage = () => {
       const response = await fetch('http://127.0.0.1:8000/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
@@ -28,10 +27,8 @@ const LoginPage = () => {
       }
 
       const data = await response.json();
-      console.log('Login successful:', data);
-      login(); // Call login to update the auth state
-      // Redirect to a protected route or dashboard
-      navigate('/');
+      login(data.token); // Save token
+      navigate('/'); // Redirect after login
     } catch (err) {
       setError(err.message);
     }
@@ -40,7 +37,7 @@ const LoginPage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <h1 className="text-3xl font-bold mb-6">Login</h1>
-      {location.state?.message && <p className="text-red-500 mb-4">{location.state.message}</p>}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleLogin} className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <div className="mb-4">
           <label htmlFor="email" className="block text-gray-700 font-bold mb-2">Email</label>
@@ -74,7 +71,6 @@ const LoginPage = () => {
             </div>
           </div>
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
           className="w-full bg-green-600 text-white py-3 rounded-lg shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
