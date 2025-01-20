@@ -221,14 +221,12 @@ const PaddyYieldHome = () => {
                   {card.description}
                 </p>
                 <div className="flex justify-center">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate(card.link)}
+                  <a
+                    href={card.link}
                     className="bg-green-700 hover:bg-green-800 text-white capitalize py-2 px-8 rounded-lg text-sm font-bold shadow-md transition-all duration-300"
                   >
                     Learn More
-                  </motion.button>
+                  </a>
                 </div>
               </motion.div>
             ))}
