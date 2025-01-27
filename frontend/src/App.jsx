@@ -15,6 +15,8 @@ import CropNurturingPage from './pages/CropNurturingPage';
 import PestControlPage from './pages/PestControlPage';
 import IrrigationManagementPage from './pages/IrrigationManagementPage';
 import HarvestPlanningPage from './pages/HarvestPlaningPage';
+import RecommendationsPage from './pages/RecommendationsPage';
+import Map from './pages/Map';
 
 const App = () => {
   return (
@@ -32,6 +34,8 @@ const App = () => {
           <Route path="/pest-control" element={<PestControlPage />} />
           <Route path="/irrigation-management" element={<IrrigationManagementPage />} />
           <Route path="/harvest-planning" element={<HarvestPlanningPage />} />
+          <Route path="/recommendations" element={<RecommendationsPage />} />
+          <Route path="/srilanka-map" element={<Map />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
         </Routes>

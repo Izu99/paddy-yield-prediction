@@ -102,7 +102,7 @@ const Footer = () => {
           </div>
 
           {/* Column 4: Company */}
-          <div className="w-full mb-6 sm:mb-0 ms-16">
+          <div className="w-auto mb-6 sm:mb-0 ms-16">
             <h4 className="text-xl font-semibold">Company</h4>
             <ul className="mt-2 space-y-2">
               <li>

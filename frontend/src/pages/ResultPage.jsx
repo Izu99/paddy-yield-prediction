@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 const ResultPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { predictionResult } = location.state || {}; // Get the prediction result from the state
 
   const [previousYield, setPreviousYield] = useState('');
@@ -34,21 +35,26 @@ const ResultPage = () => {
     }
   };
 
+  // Handle navigation to Recommendations page
+  const handleRecommendations = () => {
+    navigate('/recommendations');
+  };
+
   return (
-    <div className="min-h-screen relative"   style={{
+    <div className="min-h-screen relative" style={{
       backgroundImage:
         "url('https://lh3.googleusercontent.com/HQ9WPPhQdBRcJ3jh-cQiYeNXFxLjV3SSERuc5Qf81tDOx37dWD4JRzDGuIO45QE8j6hy98aOHWVMfcxT2N-EgjsHuLSq5g7uvGIQ2pr1R1D0RScdB_hPeEiR9ABpvaezlxLDa2xwBuYs3H_lP83S5iQ')",
       backgroundSize: "cover",
       backgroundPosition: "center",
     }}>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="relative z-10 container mx-auto px-4 py-16"
       >
         <div className="max-w-4xl mx-auto">
-          <motion.div 
+          <motion.div
             className="bg-black/80 rounded-3xl shadow-2xl overflow-hidden border border-primary/20"
             whileHover={{ boxShadow: "0 25px 50px -12px rgba(54, 168, 54, 0.25)" }}
           >
@@ -58,14 +64,14 @@ const ResultPage = () => {
               </h1>
 
               {predictionResult ? (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
                   className="space-y-8"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.02 }}
                       className="bg-darkblack/40 p-6 rounded-2xl border border-primary/30"
                     >
@@ -75,7 +81,7 @@ const ResultPage = () => {
                       </p>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.02 }}
                       className="bg-darkblack/40 p-6 rounded-2xl border border-primary/30"
                     >
@@ -114,8 +120,8 @@ const ResultPage = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`text-xl font-semibold ${
-                          comparisonResult.includes('higher') 
-                            ? 'text-primary' 
+                          comparisonResult.includes('higher')
+                            ? 'text-primary'
                             : 'text-red-800'
                         }`}
                       >
@@ -123,17 +129,32 @@ const ResultPage = () => {
                       </motion.p>
                     )}
                   </div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="mt-8 text-center"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleRecommendations}
+                      className="bg-darkgreen hover:bg-primary text-white px-8 py-3 rounded-xl
+                               font-semibold transition-colors duration-300 shadow-lg"
+                    >
+                      Get Recommendations
+                    </motion.button>
+                  </motion.div>
                 </motion.div>
               ) : (
                 <p className="text-xl text-darkyellow">No prediction result found</p>
               )}
 
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 className="mt-12 text-center"
               >
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   className="inline-block border border-darkgreen bg-darkblack/50 hover:bg-primary/80 text-white px-8 py-3 
                            rounded-xl transition-all duration-300"
                 >
