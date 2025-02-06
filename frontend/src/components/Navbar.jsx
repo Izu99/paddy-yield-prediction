@@ -46,7 +46,7 @@ const Navbar = () => {
               </div>
             </div>
             {/* Profile Image Section */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 ms-40">
               <a href="/profile">
                 <img
                   src="https://r2.erweima.ai/imgcompressed/compressed_99726877699680553dd6912404bcbb83.webp" // Replace with the correct path to your profile image

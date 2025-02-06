@@ -17,6 +17,7 @@ import IrrigationManagementPage from './pages/IrrigationManagementPage';
 import HarvestPlanningPage from './pages/HarvestPlaningPage';
 import RecommendationsPage from './pages/RecommendationsPage';
 import Map from './pages/Map';
+import NewFarmer from './pages/NewFarmer';
 
 const App = () => {
   return (
@@ -27,7 +28,6 @@ const App = () => {
           <Route path="/" element={<PaddyYieldHome />} />
           <Route path="/input-form" element={<PrivateRoute><InputPage /></PrivateRoute>} />
           <Route path="/result" element={<PrivateRoute><ResultPage /></PrivateRoute>} />
-          
           <Route path="/field-preparation" element={<FieldPreparationPage />} />
           <Route path="/seed-selection" element={<SeedSelectionPage />} />
           <Route path="/crop-nurturing" element={<CropNurturingPage />} />
@@ -38,6 +38,7 @@ const App = () => {
           <Route path="/srilanka-map" element={<Map />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/new-farmer" element={<NewFarmer />} />
         </Routes>
         <Footer />
       </Router>

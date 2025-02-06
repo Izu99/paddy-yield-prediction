@@ -36,7 +36,9 @@ const InputPage = () => {
 
   const fetchWeatherData = async (district, season) => {
     if (district && season) {
-      const response = await fetch(`http://127.0.0.1:8000/weather?district=${district}&season=${season}`);
+      const response = await fetch(
+        `http://127.0.0.1:8000/weather?district=${district}&season=${season}`
+      );
       const data = await response.json();
       setFormData((prevData) => ({
         ...prevData,
@@ -63,7 +65,7 @@ const InputPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Extract and save the input data in sessionStorage
     const essentialData = {
       district: formData.district,
@@ -73,8 +75,8 @@ const InputPage = () => {
       potassium: formData.soil_potassium,
       pest_severity: formData.pest_severity,
     };
-    sessionStorage.setItem('essentialData', JSON.stringify(essentialData));
-  
+    sessionStorage.setItem("essentialData", JSON.stringify(essentialData));
+
     // Call the prediction API (unchanged)
     const response = await fetch("http://127.0.0.1:8000/predict", {
       method: "POST",
@@ -83,65 +85,93 @@ const InputPage = () => {
       },
       body: JSON.stringify(formData),
     });
-  
+
     const result = await response.json();
     console.log("Prediction Result:", result);
-  
+
     try {
       // Extract variables from formData for readability
-      const { district, season, soil_nitrogen, soil_phosphorus, soil_potassium, pest_severity } = formData;
-  
+      const {
+        district,
+        season,
+        soil_nitrogen,
+        soil_phosphorus,
+        soil_potassium,
+        pest_severity,
+      } = formData;
+
       // Fetch soil recommendations
-      const soilResponse = await fetch(`http://127.0.0.1:8000/api/soil-recommendations?district=${district}&season=${season}&nitrogen=${soil_nitrogen}&phosphorus=${soil_phosphorus}&potassium=${soil_potassium}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const soilResponse = await fetch(
+        `http://127.0.0.1:8000/api/soil-recommendations?district=${district}&season=${season}&nitrogen=${soil_nitrogen}&phosphorus=${soil_phosphorus}&potassium=${soil_potassium}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       const soilData = await soilResponse.json();
       console.log("Soil Recommendations:", soilData);
-  
+
       // Fetch pest recommendations
-      const pestResponse = await fetch(`http://127.0.0.1:8000/api/pest-recommendations?pest_severity=${pest_severity}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const pestResponse = await fetch(
+        `http://127.0.0.1:8000/api/pest-recommendations?pest_severity=${pest_severity}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       const pestData = await pestResponse.json();
       console.log("Pest Recommendations:", pestData);
-  
+
       // Fetch water supply recommendations
-      const waterResponse = await fetch(`http://127.0.0.1:8000/api/water-supply-recommendations?district=${district}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const waterResponse = await fetch(
+        `http://127.0.0.1:8000/api/water-supply-recommendations?district=${district}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       const waterData = await waterResponse.json();
       console.log("Water Supply Recommendations:", waterData);
-  
+
       // Fetch district recommendations
-      const districtResponse = await fetch(`http://127.0.0.1:8000/api/district-recommendations?district=${district}&season=${season}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const districtResponse = await fetch(
+        `http://127.0.0.1:8000/api/district-recommendations?district=${district}&season=${season}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       const districtData = await districtResponse.json();
       console.log("District Recommendations:", districtData);
-  
+
       // Save the fetched data to sessionStorage
-      sessionStorage.setItem('soilRecommendations', JSON.stringify(soilData));
-      sessionStorage.setItem('pestRecommendations', JSON.stringify(pestData));
-      sessionStorage.setItem('waterRecommendations', JSON.stringify(waterData));
-      sessionStorage.setItem('districtRecommendations', JSON.stringify(districtData));
-  
+      sessionStorage.setItem("soilRecommendations", JSON.stringify(soilData));
+      sessionStorage.setItem("pestRecommendations", JSON.stringify(pestData));
+      sessionStorage.setItem("waterRecommendations", JSON.stringify(waterData));
+      sessionStorage.setItem(
+        "districtRecommendations",
+        JSON.stringify(districtData)
+      );
     } catch (error) {
-      console.error('Error fetching recommendations:', error);
+      console.error("Error fetching recommendations:", error);
     }
-  
+
     // Navigate to the result page with the prediction result (unchanged)
     navigate("/result", { state: { predictionResult: result } });
-  };  
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     // Sanitize values for soil nutrients to be non-negative
-    const sanitizedValue = (name === "soil_nitrogen" || name === "soil_phosphorus" || name === "soil_potassium") && value < 0 ? 0 : value;
+    const sanitizedValue =
+      (name === "soil_nitrogen" ||
+        name === "soil_phosphorus" ||
+        name === "soil_potassium" ||
+        name === "fertilizer_usage") &&
+      value < 0
+        ? 0
+        : value;
 
     setFormData((prevData) => ({
       ...prevData,
@@ -245,6 +275,19 @@ const InputPage = () => {
                   options = [];
               }
 
+              // Add units for specific fields
+              const labelUnits = {
+                temperature: " (°C)",
+                rainfall: " (mm)",
+                sunshine_hours: " (hours)",
+                humidity: " (%)",
+                wind_speed: " (m/s)",
+                soil_nitrogen: " (%)",
+                soil_phosphorus: " (%)",
+                soil_potassium: " (%)",
+                area: " (hectares)",
+              };
+
               return (
                 <div key={key} className="col-span-1">
                   <label
@@ -252,6 +295,7 @@ const InputPage = () => {
                     className="block font-medium text-gray-100 mb-2"
                   >
                     {key.replace(/_/g, " ")}
+                    {labelUnits[key] || ""}
                   </label>
                   {options.length > 0 ? (
                     <select
@@ -308,8 +352,8 @@ const InputPage = () => {
               >
                 <div
                   className="absolute inset-0 transform scale-x-0 group-hover:scale-x-100 
-                          transition-transform origin-left duration-300">
-                </div>
+                          transition-transform origin-left duration-300"
+                ></div>
                 <span className="relative flex items-center gap-3">
                   <FaSeedling className="text-2xl" />
                   <span>Generate Prediction</span>
