@@ -43,6 +43,9 @@ const RegisterPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-16 h-16 bg-gradient-to-r from-green-500/10 to-emerald-600/16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <img src="./logo.png" alt="Logo" className="w-8 h-8" />
+          </div>
       <h1 className="text-3xl font-bold mb-6">Register</h1>
       <form onSubmit={handleRegister} className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <div className="mb-4">

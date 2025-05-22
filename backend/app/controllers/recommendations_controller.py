@@ -125,39 +125,6 @@ def determine_level(nutrient_range: str, nutrient_value: float) -> str:
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid nutrient range format: {str(e)}")
 
-# Controller function to get water supply recommendations based on the district
-async def get_water_supply_data(db: Session, district: str):
-    try:
-        # Fetch water supply data for the given district
-        water_supply_data = db.query(WaterSupply).filter(
-            WaterSupply.district == district
-        ).first()
-
-        if not water_supply_data:
-            raise HTTPException(status_code=404, detail="No water supply data found for the given district.")
-
-        return water_supply_data
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching water supply data: {str(e)}")
-
-# Controller function to get water supply data based on district
-async def get_water_supply_data(db: Session, district: str):
-    try:
-        # Fetch water supply data for the given district
-        water_supply_data = db.query(WaterSupply).filter(
-            WaterSupply.district == district
-        ).first()
-
-        if not water_supply_data:
-            raise HTTPException(status_code=404, detail="No water supply data found for the given district.")
-
-        # Return data as WaterSupplyBase schema, since WaterSupplyBase is used for both request and response
-        return WaterSupplyBase.from_orm(water_supply_data)
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching water supply data: {str(e)}")
-    
 
 # Controller function to get water supply recommendations based on district
 async def get_water_supply_recommendations(db: Session, district: str):
