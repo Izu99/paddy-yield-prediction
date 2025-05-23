@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
 
 const RecommendationsPage = () => {
   const [soilRecommendations, setSoilRecommendations] = useState([]);
@@ -43,91 +42,234 @@ const RecommendationsPage = () => {
 
   const generatePDF = () => {
     const doc = new jsPDF();
-    doc.setFont("helvetica");
+    let yPosition = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const lineHeight = 7;
+
+    // Helper function to check if we need a new page
+    const checkNewPage = (requiredSpace = 20) => {
+      if (yPosition + requiredSpace > pageHeight - margin) {
+        doc.addPage();
+        yPosition = 20;
+      }
+    };
+
+    // Helper function to add wrapped text
+    const addWrappedText = (text, x, maxWidth = 170) => {
+      const lines = doc.splitTextToSize(text, maxWidth);
+      doc.text(lines, x, yPosition);
+      yPosition += lines.length * lineHeight;
+    };
+
+    // Set colors and fonts
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
     doc.setTextColor(34, 139, 34);
 
-    doc.setFontSize(22);
-    doc.text("Agricultural Recommendations", 20, 20);
+    // Title
+    doc.text("Agricultural Recommendations Report", margin, yPosition);
+    yPosition += 15;
 
-    doc.setFontSize(16);
-    doc.text("Soil Recommendations", 20, 30);
-    const soilData = soilRecommendations.map((rec, index) => [
-      index + 1,
-      rec.nutrient,
-      rec.level,
-      rec.detailed_recommendation,
-    ]);
-    doc.autoTable({
-      startY: 35,
-      head: [["#", "Nutrient", "Level", "Recommendation"]],
-      body: soilData,
-      theme: "grid",
-      styles: { fillColor: [220, 220, 220] },
-      headStyles: { fillColor: [0, 128, 0], textColor: [255, 255, 255] },
-    });
-
-    doc.addPage();
-    doc.text("Pest Recommendations", 20, 20);
-    const pestData = pestRecommendations.map((rec, index) => [
-      index + 1,
-      rec.pest_severity,
-      rec.recommendation,
-    ]);
-    doc.autoTable({
-      startY: 25,
-      head: [["#", "Severity", "Recommendation"]],
-      body: pestData,
-      theme: "grid",
-      styles: { fillColor: [220, 220, 220] },
-      headStyles: { fillColor: [0, 128, 0], textColor: [255, 255, 255] },
-    });
-
-    doc.addPage();
-    doc.text("Water Supply Recommendations", 20, 20);
-    const waterData = waterRecommendations.map((rec, index) => [
-      index + 1,
-      rec.rainwater,
-      rec.river_water,
-      rec.irrigation,
-      rec.supply_methods,
-    ]);
-    doc.autoTable({
-      startY: 25,
-      head: [["#", "Rainwater", "River Water", "Irrigation", "Supply Methods"]],
-      body: waterData,
-      theme: "grid",
-      styles: { fillColor: [220, 220, 220] },
-      headStyles: { fillColor: [0, 128, 0], textColor: [255, 255, 255] },
-    });
-
-    doc.addPage();
+    // Add generation date
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
     doc.text(
-      `District Recommendations for ${inputData.district} (${inputData.season})`,
-      20,
-      20
+      `Generated on: ${new Date().toLocaleDateString()}`,
+      margin,
+      yPosition
     );
-    const districtData = [
-      ["1", districtRecommendations.recommendation_1 || "N/A"],
-      ["2", districtRecommendations.recommendation_2 || "N/A"],
-      ["3", districtRecommendations.recommendation_3 || "N/A"],
-      ["4", districtRecommendations.recommendation_4 || "N/A"],
-      ["5", districtRecommendations.recommendation_5 || "N/A"],
-      ["6", districtRecommendations.recommendation_6 || "N/A"],
-      ["7", districtRecommendations.recommendation_7 || "N/A"],
-      ["8", districtRecommendations.recommendation_8 || "N/A"],
-      ["9", districtRecommendations.recommendation_9 || "N/A"],
-      ["10", districtRecommendations.recommendation_10 || "N/A"],
-    ];
-    doc.autoTable({
-      startY: 25,
-      head: [["#", "Recommendation"]],
-      body: districtData,
-      theme: "grid",
-      styles: { fillColor: [220, 220, 220] },
-      headStyles: { fillColor: [0, 128, 0], textColor: [255, 255, 255] },
-    });
+    yPosition += 20;
 
-    doc.save("recommendations.pdf");
+    // District and Season Info
+    if (inputData.district || inputData.season) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text(
+        `District: ${inputData.district || "N/A"} | Season: ${
+          inputData.season || "N/A"
+        }`,
+        margin,
+        yPosition
+      );
+      yPosition += 15;
+    }
+
+    // Soil Recommendations Section
+    if (soilRecommendations.length > 0) {
+      checkNewPage(30);
+
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(34, 139, 34);
+      doc.text("Soil Recommendations", margin, yPosition);
+      yPosition += 15;
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(0, 0, 0);
+
+      soilRecommendations.forEach((rec, index) => {
+        checkNewPage(25);
+
+        // Add recommendation box
+        doc.setFillColor(240, 255, 240);
+        doc.rect(margin, yPosition - 5, 170, 20, "F");
+
+        doc.setFont("helvetica", "bold");
+        doc.text(
+          `${index + 1}. ${rec.nutrient} - Level: ${rec.level}`,
+          margin + 5,
+          yPosition + 3
+        );
+        yPosition += 8;
+
+        doc.setFont("helvetica", "normal");
+        addWrappedText(rec.detailed_recommendation, margin + 5, 160);
+        yPosition += 10;
+      });
+    }
+
+    // Pest Recommendations Section
+    if (pestRecommendations.length > 0) {
+      checkNewPage(30);
+
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(220, 53, 69);
+      doc.text("Pest Management Recommendations", margin, yPosition);
+      yPosition += 15;
+
+      if (inputData.pest_severity) {
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text(
+          `Severity Level: ${inputData.pest_severity}`,
+          margin,
+          yPosition
+        );
+        yPosition += 10;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(0, 0, 0);
+
+      pestRecommendations.forEach((rec, index) => {
+        checkNewPage(20);
+
+        doc.setFillColor(255, 245, 245);
+        doc.rect(margin, yPosition - 5, 170, 15, "F");
+
+        doc.text(`${index + 1}.`, margin + 5, yPosition + 3);
+        addWrappedText(rec.recommendation, margin + 15, 150);
+        yPosition += 5;
+      });
+    }
+
+    // Water Supply Recommendations Section
+    if (waterRecommendations.length > 0) {
+      checkNewPage(30);
+
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 123, 255);
+      doc.text("Water Supply Recommendations", margin, yPosition);
+      yPosition += 15;
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(0, 0, 0);
+
+      waterRecommendations.forEach((rec, index) => {
+        checkNewPage(40);
+
+        doc.setFillColor(240, 248, 255);
+        doc.rect(margin, yPosition - 5, 170, 35, "F");
+
+        doc.setFont("helvetica", "bold");
+        doc.text(
+          `Water Management Plan ${index + 1}:`,
+          margin + 5,
+          yPosition + 3
+        );
+        yPosition += 8;
+
+        doc.setFont("helvetica", "normal");
+        doc.text(`• Rainwater: ${rec.rainwater}`, margin + 10, yPosition);
+        yPosition += 6;
+        doc.text(`• River Water: ${rec.river_water}`, margin + 10, yPosition);
+        yPosition += 6;
+        doc.text(`• Irrigation: ${rec.irrigation}`, margin + 10, yPosition);
+        yPosition += 6;
+        doc.text(
+          `• Supply Methods: ${rec.supply_methods}`,
+          margin + 10,
+          yPosition
+        );
+        yPosition += 10;
+      });
+    }
+
+    // District-Specific Recommendations
+    if (
+      districtRecommendations &&
+      Object.keys(districtRecommendations).length > 0
+    ) {
+      checkNewPage(30);
+
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 140, 0);
+      doc.text(`District-Specific Recommendations`, margin, yPosition);
+      yPosition += 15;
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(0, 0, 0);
+
+      let recCount = 1;
+      Object.keys(districtRecommendations).forEach((key) => {
+        if (key.startsWith("recommendation") && districtRecommendations[key]) {
+          checkNewPage(20);
+
+          doc.setFillColor(255, 248, 220);
+          doc.rect(margin, yPosition - 5, 170, 15, "F");
+
+          doc.text(`${recCount}.`, margin + 5, yPosition + 3);
+          addWrappedText(districtRecommendations[key], margin + 15, 150);
+          yPosition += 5;
+          recCount++;
+        }
+      });
+    }
+
+    // Add footer with contact info
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Page ${i} of ${totalPages}`,
+        doc.internal.pageSize.width - 40,
+        doc.internal.pageSize.height - 10
+      );
+      doc.text(
+        "Agricultural Recommendations System",
+        margin,
+        doc.internal.pageSize.height - 10
+      );
+    }
+
+    // Save the PDF
+    doc.save(
+      `Agricultural_Recommendations_${inputData.district || "Report"}_${
+        new Date().toISOString().split("T")[0]
+      }.pdf`
+    );
   };
 
   return (
@@ -140,7 +282,7 @@ const RecommendationsPage = () => {
             backgroundImage: `url('https://static.vecteezy.com/system/resources/thumbnails/035/540/306/small_2x/ai-generated-green-rice-fields-in-the-rainy-season-beautiful-natural-scenery-photo.jpg')`,
           }}
         />
-        <div className="absolute inset-0 bg-black bg-opacity-50" /> {/* Changed from 30 to 50 for more opacity */}
+        <div className="absolute inset-0 bg-black bg-opacity-50" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -188,9 +330,12 @@ const RecommendationsPage = () => {
           <div className="space-y-6">
             {soilRecommendations.length > 0 ? (
               soilRecommendations.map((rec, index) => (
-                <div
+                <motion.div
                   key={index}
-                  className="p-6 rounded-lg bg-white shadow-md border-l-4 border-green-500"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="p-6 rounded-lg bg-white shadow-md border-l-4 border-green-500 hover:shadow-lg transition-shadow"
                 >
                   <h3 className="text-xl font-semibold text-green-700">
                     {rec.nutrient} - {rec.level}
@@ -198,10 +343,12 @@ const RecommendationsPage = () => {
                   <p className="text-gray-700 mt-2">
                     {rec.detailed_recommendation}
                   </p>
-                </div>
+                </motion.div>
               ))
             ) : (
-              <p className="text-gray-500">No soil recommendations available.</p>
+              <p className="text-gray-500 text-center">
+                No soil recommendations available.
+              </p>
             )}
           </div>
         </section>
@@ -210,18 +357,27 @@ const RecommendationsPage = () => {
         <section className="mb-16 flex flex-col-reverse lg:flex-row items-center gap-10 bg-gray-100 p-10 rounded-xl">
           <div className="lg:w-1/2">
             <h2 className="text-4xl font-semibold text-green-700 mb-6">
-              Pest Recommendations ({inputData.pest_severity})
+              Pest Recommendations{" "}
+              {inputData.pest_severity && `(${inputData.pest_severity})`}
             </h2>
             {pestRecommendations.length > 0 ? (
-              <ul className="list-disc pl-6">
+              <div className="space-y-4">
                 {pestRecommendations.map((rec, index) => (
-                  <li key={index} className="m-2 text-gray-700">
-                    <p>{rec.recommendation}</p>
-                  </li>
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="p-4 bg-white rounded-lg shadow-sm border-l-4 border-red-400"
+                  >
+                    <p className="text-gray-700">{rec.recommendation}</p>
+                  </motion.div>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p className="text-gray-500">No pest recommendations available.</p>
+              <p className="text-gray-500">
+                No pest recommendations available.
+              </p>
             )}
           </div>
           <motion.img
@@ -241,54 +397,66 @@ const RecommendationsPage = () => {
           </h2>
           <div className="">
             <div className="bg-darkblack/0 rounded-lg text-gray-800">
-              <p>
-                <em>water sources (rainwater, river, irrigation)</em> and{" "}
+              <p className="mb-6 text-lg">
+                <em>Water sources (rainwater, river, irrigation)</em> and{" "}
                 <em>supply methods (rainfed, tubewell, canal)</em> impact paddy
                 cultivation in Sri Lanka's districts, the following
                 comprehensive details can be provided for each district.
               </p>
-              <div className="flex flex-row gap-10 mt-10">
+              <div className="flex flex-col lg:flex-row gap-10 mt-10">
                 <motion.img
                   src="https://png.pngtree.com/thumb_back/fw800/background/20240716/pngtree-water-flows-out-of-the-pipes-into-green-rice-fields-image_16007479.jpg"
                   alt="Water Recommendations"
-                  className="w-1/2 shadow-2xl rounded-lg"
+                  className="lg:w-1/2 w-full shadow-2xl rounded-lg"
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 1 }}
                 />
-                <div className="w-1/2 shadow-2xl p-10 bg-primary/10 rounded-xl min-h-[400px] flex-1">
-                  <h2 className="text-2xl font-semibold italic text-primary mb-6 relative flex">
-                    Water Supply Recommendations
-                    <span className="block text-2xl font-bold text-darkyellow ms-2">
-                      For You
-                    </span>
-                  </h2>
+                <div className="lg:w-1/2 w-full shadow-2xl p-10 bg-blue-50 rounded-xl min-h-[400px] flex-1">
+                  <h3 className="text-2xl font-semibold text-blue-700 mb-6">
+                    Water Supply Recommendations For You
+                  </h3>
                   {waterRecommendations.length > 0 ? (
-                    waterRecommendations.map((rec, index) => (
-                      <div
-                        key={index}
-                        className="text-gray-800 bg-white rounded-lg mb-4 p-4 shadow-sm border border-primary/30"
-                      >
-                        <ul className="list-disc pl-6 space-y-3">
-                          <li className="leading-relaxed">
-                            <span className="font-semibold">Rainwater:</span>{" "}
-                            {rec.rainwater}
-                          </li>
-                          <li className="leading-relaxed">
-                            <span className="font-semibold">River Water:</span>{" "}
-                            {rec.river_water}
-                          </li>
-                          <li className="leading-relaxed">
-                            <span className="font-semibold">Irrigation:</span>{" "}
-                            {rec.irrigation}
-                          </li>
-                          <li className="leading-relaxed">
-                            <span className="font-semibold">Supply Methods:</span>{" "}
-                            {rec.supply_methods}
-                          </li>
-                        </ul>
-                      </div>
-                    ))
+                    <div className="space-y-4">
+                      {waterRecommendations.map((rec, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="text-gray-800 bg-white rounded-lg p-4 shadow-sm border border-blue-200"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap gap-4">
+                              <span className="font-semibold text-blue-600">
+                                Rainwater:
+                              </span>
+                              <span className="flex-1">{rec.rainwater}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-4">
+                              <span className="font-semibold text-blue-600">
+                                River Water:
+                              </span>
+                              <span className="flex-1">{rec.river_water}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-4">
+                              <span className="font-semibold text-blue-600">
+                                Irrigation:
+                              </span>
+                              <span className="flex-1">{rec.irrigation}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-4">
+                              <span className="font-semibold text-blue-600">
+                                Supply Methods:
+                              </span>
+                              <span className="flex-1">
+                                {rec.supply_methods}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   ) : (
                     <p className="text-gray-500 text-center">
                       No water recommendations available.
@@ -296,140 +464,192 @@ const RecommendationsPage = () => {
                   )}
                 </div>
               </div>
-              <div className="flex gap-10">
-                <div className="bg-gray-100 my-10 rounded-lg shadow-2xl p-5 min-h-[400px] flex-1">
-                  <h3 className="text-3xl text-darkgreen text-shadow mt-8 mb-4 text-center">
-                    General Impact of Water Sources
+
+              <div className="grid md:grid-cols-2 gap-10 mt-10">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-2xl p-6"
+                >
+                  <h3 className="text-2xl font-bold text-green-700 mb-6 text-center">
+                    💧 Impact of Water Sources
                   </h3>
-                  <ul className="list-disc list-inside ml-6 mb-6">
-                    <li className="mb-2">
-                      <strong>Rainwater:</strong>
-                      <ul className="list-disc list-inside ml-6">
-                        <ol>Relies on seasonal rainfall patterns.</ol>
-                        <ol>
-                          Requires good water-holding soil (clayey or loamy).
-                        </ol>
-                        <ol>
-                          May lead to water shortages during dry spells (Yala).
-                        </ol>
+                  <div className="space-y-4">
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <h4 className="font-bold text-green-600 mb-2">
+                        Rainwater:
+                      </h4>
+                      <ul className="text-sm space-y-1 text-gray-700">
+                        <li>• Relies on seasonal rainfall patterns</li>
+                        <li>
+                          • Requires good water-holding soil (clayey or loamy)
+                        </li>
+                        <li>
+                          • May lead to water shortages during dry spells (Yala)
+                        </li>
                       </ul>
-                    </li>
-                    <li className="mb-2">
-                      <strong>River Water:</strong>
-                      <ul className="list-disc list-inside ml-6">
-                        <ol>
-                          Provides a consistent and reliable water source if
-                          managed properly.
-                        </ol>
-                        <ol>
-                          Best suited for regions with access to perennial
-                          rivers.
-                        </ol>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <h4 className="font-bold text-blue-600 mb-2">
+                        River Water:
+                      </h4>
+                      <ul className="text-sm space-y-1 text-gray-700">
+                        <li>• Provides consistent and reliable water source</li>
+                        <li>• Best suited for regions with perennial rivers</li>
                       </ul>
-                    </li>
-                    <li className="mb-2">
-                      <strong>Irrigation Supply:</strong>
-                      <ul className="list-disc list-inside ml-6">
-                        <ol>Offers flexibility in water management.</ol>
-                        <ol>
-                          Includes systems like canals, tubewells, and tanks.
-                        </ol>
-                        <ol>
-                          Reduces dependency on rainfall, ensuring crop
-                          security.
-                        </ol>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <h4 className="font-bold text-purple-600 mb-2">
+                        Irrigation Supply:
+                      </h4>
+                      <ul className="text-sm space-y-1 text-gray-700">
+                        <li>• Offers flexibility in water management</li>
+                        <li>• Includes canals, tubewells, and tanks</li>
+                        <li>• Reduces dependency on rainfall</li>
                       </ul>
-                    </li>
-                  </ul>
-                </div>
-                <div className="bg-gray-100 my-10 rounded-lg shadow-2xl p-5 min-h-[400px] flex-1">
-                  <h3 className="text-3xl text-darkgreen text-shadow mt-8 mb-4 text-center">
-                    General Impact of Water Supply Methods
+                    </div>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-2xl p-6"
+                >
+                  <h3 className="text-2xl font-bold text-blue-700 mb-6 text-center">
+                    🚰 Impact of Supply Methods
                   </h3>
-                  <ul className="list-disc list-inside ml-6">
-                    <li className="mb-2">
-                      <strong>Rainfed:</strong>
-                      <ul className="list-disc list-inside ml-6">
-                        <ol>
-                          Highly dependent on monsoon timing and intensity.
-                        </ol>
-                        <ol>Suited for Maha season with adequate rainfall.</ol>
-                        <ol>
-                          Risk of crop failure during erratic or insufficient
-                          rains.
-                        </ol>
+                  <div className="space-y-4">
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <h4 className="font-bold text-green-600 mb-2">
+                        Rainfed:
+                      </h4>
+                      <ul className="text-sm space-y-1 text-gray-700">
+                        <li>• Highly dependent on monsoon timing</li>
+                        <li>• Suited for Maha season with adequate rainfall</li>
+                        <li>• Risk of crop failure during erratic rains</li>
                       </ul>
-                    </li>
-                    <li className="mb-2">
-                      <strong>Tubewell:</strong>
-                      <ul className="list-disc list-inside ml-6">
-                        <ol>Provides controlled and reliable water supply.</ol>
-                        <ol>
-                          Effective for water-scarce districts with good
-                          groundwater availability.
-                        </ol>
-                        <ol>May lead to soil salinity if overused.</ol>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <h4 className="font-bold text-orange-600 mb-2">
+                        Tubewell:
+                      </h4>
+                      <ul className="text-sm space-y-1 text-gray-700">
+                        <li>• Provides controlled water supply</li>
+                        <li>• Effective for water-scarce districts</li>
+                        <li>• May lead to soil salinity if overused</li>
                       </ul>
-                    </li>
-                    <li className="mb-2">
-                      <strong>Canal:</strong>
-                      <ul className="list-disc list-inside ml-6">
-                        <ol>Efficient for large-scale irrigation systems.</ol>
-                        <ol>
-                          Requires proper maintenance to prevent water loss.
-                        </ol>
-                        <ol>
-                          Works best in districts with established irrigation
-                          infrastructure.
-                        </ol>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <h4 className="font-bold text-teal-600 mb-2">Canal:</h4>
+                      <ul className="text-sm space-y-1 text-gray-700">
+                        <li>• Efficient for large-scale irrigation</li>
+                        <li>• Requires proper maintenance</li>
+                        <li>• Works best with established infrastructure</li>
                       </ul>
-                    </li>
-                  </ul>
-                </div>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
             </div>
           </div>
         </section>
 
         {/* District Recommendations */}
-        <section>
+        <section className="mb-16">
           <h2 className="text-4xl font-semibold text-green-700 text-center mb-6">
-            District Recommendations for {inputData.district} (
-            {inputData.season})
+            District Recommendations for {inputData.district || "Your Area"} (
+            {inputData.season || "Current Season"})
           </h2>
-          {districtRecommendations ? (
-            Object.keys(districtRecommendations).map(
-              (key, index) =>
-                key.startsWith("recommendation") && (
-                  <div
-                    key={index}
-                    className="p-6 mb-4 bg-gray-200 rounded-lg shadow-md"
-                  >
-                    <p className="text-gray-800">
-                      {districtRecommendations[key]}
-                    </p>
-                  </div>
-                )
-            )
-          ) : (
-            <p className="text-gray-500 text-center">
-              No district recommendations available.
-            </p>
-          )}
+          <div className="space-y-4">
+            {districtRecommendations &&
+            Object.keys(districtRecommendations).length > 0 ? (
+              Object.keys(districtRecommendations).map(
+                (key, index) =>
+                  key.startsWith("recommendation") &&
+                  districtRecommendations[key] && (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="p-6 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg shadow-md border-l-4 border-orange-400 hover:shadow-lg transition-shadow"
+                    >
+                      <div className="flex items-start">
+                        <span className="bg-orange-400 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">
+                          {index + 1}
+                        </span>
+                        <p className="text-gray-800 leading-relaxed">
+                          {districtRecommendations[key]}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )
+              )
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">
+                  No district recommendations available.
+                </p>
+              </div>
+            )}
+          </div>
         </section>
       </div>
-      <div className="p-6 bg-green-100 flex justify-center">
-        <button
+
+      {/* PDF Download Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-8 bg-gradient-to-r from-green-100 to-emerald-100 flex flex-col items-center"
+      >
+        <h3 className="text-2xl font-bold text-green-800 mb-4">
+          Download Your Complete Report
+        </h3>
+        <p className="text-green-700 mb-6 text-center max-w-2xl">
+          Get a comprehensive PDF report with all your personalized agricultural
+          recommendations for easy sharing and offline reference.
+        </p>
+        <motion.button
+          whileHover={{
+            scale: 1.05,
+            boxShadow: "0 10px 25px rgba(34, 197, 94, 0.3)",
+          }}
+          whileTap={{ scale: 0.95 }}
           onClick={generatePDF}
-          className="mt-4 bg-green-500 text-white px-40 py-2 rounded shadow-lg hover:bg-green-600"
+          className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-12 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3"
         >
-          Download PDF
-        </button>
-      </div>
-      <div className="flex justify-end">
-        <h2 className="text-darkgreen text-xl py-4 pe-10">
-          <a href="/new-farmer">Are you a New Farmer?</a>
-        </h2>
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          Download PDF Report
+        </motion.button>
+      </motion.div>
+
+      <div className="flex justify-end bg-green-50 py-6">
+        <motion.h2
+          whileHover={{ scale: 1.05 }}
+          className="text-green-700 text-xl font-semibold pe-10 hover:text-green-800 transition-colors"
+        >
+          <a
+            href="/new-farmer"
+            className="underline decoration-2 underline-offset-4"
+          >
+            Are you a New Farmer? Get Started Here →
+          </a>
+        </motion.h2>
       </div>
     </div>
   );

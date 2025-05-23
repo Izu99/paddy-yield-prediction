@@ -70,7 +70,7 @@ const RiceVarietyForm = () => {
         }
       );
       
-      navigate("/result", {
+      navigate("/variety-result", {
         state: {
           province: formData.province,
           district: formData.district,

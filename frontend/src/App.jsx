@@ -77,7 +77,7 @@ const App = () => {
             <Route path="/harvest-planning" element={<HarvestPlanningPage />} />
             <Route path="/recommendations" element={<RecommendationsPage />} />
             <Route path="/new-farmer" element={<NewFarmer />} />
-            <Route path="/home" element={<ModernLandingPage />} />
+            {/* <Route path="/home" element={<ModernLandingPage />} /> */}
 
             {/* Variety Prediction Feature */}
             <Route path="/variety-home" element={<VarietyPredictionHome />} />
